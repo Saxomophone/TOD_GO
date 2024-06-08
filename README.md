@@ -1,0 +1,1 @@
+I was playing discord TOD with some friends and the default version was very boring so they downloaded and 18+ one but that was all about s*x and stuff and I've wanted to make a discord bot + learn golang for a while so I decided to make a mature but not entirely focused on s*x TOD bot
