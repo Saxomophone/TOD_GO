@@ -1,16 +1,17 @@
 package main
 
 import (
-    "github.com/bwmarrin/discordgo"
-    "log"
-    "fmt"
-    "os"
-    "os/signal"
-    "syscall"
-		"strings"
-		"math/rand"
-		"time"
-		"github.com/joho/godotenv"
+	"fmt"
+	"log"
+	"math/rand"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+	"time"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -18,7 +19,7 @@ func main() {
 
 	token := os.Getenv("BOT_TOKEN")
 	sess, err := discordgo.New("Bot " + token)
-	if err!= nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -34,7 +35,7 @@ func main() {
 		if args[0] != prefix {
 			return
 		}
-		
+
 		if args[1] == "greek" {
 			greek_alpahbet := []string{
 				"α",
@@ -62,29 +63,27 @@ func main() {
 				"ψ",
 				"ω",
 			}
-		
-		rand.Seed(time.Now().UnixNano())
-		selection := rand.Intn(len(greek_alpahbet))
 
+			rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+			selection := rng.Intn(len(greek_alpahbet))
 
-		embed := &discordgo.MessageEmbed{
-			Title: "Greek Alphabet",
-			Description: greek_alpahbet[selection],
-			Color: 0x94B1FF,
-		}
+			embed := &discordgo.MessageEmbed{
+				Title:       "Greek Alphabet",
+				Description: greek_alpahbet[selection],
+				Color:       0x94B1FF,
+			}
 
-		s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
 		}
 	})
 
 	sess.Identify.Intents = discordgo.IntentsAll
 
 	err = sess.Open()
-	if err!= nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 	defer sess.Close()
-
 
 	fmt.Println("Bot is running!")
 
