@@ -14,6 +14,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var pingRunning bool = true
+
 const errorColor = 0xDE0a26
 
 func main() {
@@ -21,6 +23,7 @@ func main() {
 	token := os.Getenv("BOT_TOKEN")
 	jimUserID := os.Getenv("JIM_USER_ID")
 	jimChannelID := os.Getenv("JIM_CHANNEL_ID")
+	pingRunning = false
 
 	sess, err := discordgo.New("Bot " + token)
 	if err != nil {
@@ -45,13 +48,10 @@ func main() {
 				Title: "No command specified",
 				Color: errorColor,
 			}
-
 			s.ChannelMessageSendEmbed(m.ChannelID, embed)
 
-		} else if args[1] == "jim" {
-			ping(jimUserID, jimChannelID, s)
-
-		} else if args[1] == "jim" && args[2] == "stop" {
+		} else if len(args) == 3 && args[1] == "jim" && args[2] == "stop" {
+			pingRunning = false
 			embed := &discordgo.MessageEmbed{
 				Title: "JimBot has been stopped :(",
 				Color: 0x94B1FF,
@@ -60,6 +60,11 @@ func main() {
 			if m.ChannelID != jimChannelID {
 				s.ChannelMessageSendEmbed(jimChannelID, embed)
 			} //pings in sent channel and jim channel (if not already in jim channel)
+
+			log.Printf("immediately after: \npingRunning: %v", pingRunning)
+
+		} else if len(args) == 2 && args[1] == "jim" {
+			pingRunning = true
 
 		} else if args[1] == "greek" {
 			greek_alpahbet := []string{
@@ -107,6 +112,8 @@ func main() {
 
 			s.ChannelMessageSendEmbed(m.ChannelID, embed)
 		}
+
+		ping(jimUserID, jimChannelID, s, pingRunning)
 	})
 
 	sess.Identify.Intents = discordgo.IntentsAll
@@ -124,8 +131,16 @@ func main() {
 	<-sc
 }
 
-func ping(userID string, channelID string, sess *discordgo.Session) {
-	for {
-		sess.ChannelMessageSend(channelID, "<@"+userID+">")
+func ping(userID string, channelID string, sess *discordgo.Session, pingRunning bool) {
+	for pingRunning {
+		log.Printf("pingRunning: %v", pingRunning)
+		_, err := sess.ChannelMessageSend(channelID, "<@"+userID+">")
+
+		time.Sleep(500 * time.Millisecond)
+
+		if err != nil {
+			fmt.Printf("Failed to send message: %v\n", err)
+			break
+		}
 	}
 }
